@@ -62,6 +62,13 @@ const state = {
   cardRefs: {},
 };
 
+// SAFETY: Define logToUI to prevent ReferenceErrors if old code is cached or missed
+window.logToUI = function (msg) { console.log("[UI-LOG]", msg); };
+window.onerror = function (msg, url, line) {
+  console.error("Global Error:", msg, "@", line);
+  // Optional: alert("Error: " + msg); 
+};
+
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const uploadActions = document.getElementById("uploadActions");
@@ -212,21 +219,31 @@ async function initThemesAndFormats() {
     if (!res.ok) throw new Error("Config not loaded");
     const config = await res.json();
 
-    // Populate Text
+    // Populate Text with safety checks
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el && text) el.textContent = text;
+    };
+
     if (config.text) {
-      if (config.text.heroTitle && document.getElementById("heroTitle")) {
-        document.getElementById("heroTitle").textContent = config.text.heroTitle;
-      }
-      if (config.text.heroSub) document.getElementById("heroSub").textContent = config.text.heroSub;
-      if (config.text.step1) document.getElementById("step1").textContent = config.text.step1;
-      if (config.text.step2) document.getElementById("step2").textContent = config.text.step2;
-      if (config.text.step3) document.getElementById("step3").textContent = config.text.step3;
-      if (config.text.stepExtra) document.getElementById("stepExtra").textContent = config.text.stepExtra;
-      if (config.text.footer) document.getElementById("footerText").textContent = config.text.footer;
+      setText("heroTitle", config.text.heroTitle);
+      setText("heroSub", config.text.heroSub);
+      setText("step1", config.text.step1);
+      setText("step2", config.text.step2);
+      setText("step3", config.text.step3);
+      setText("stepExtra", config.text.stepExtra);
+      setText("footerText", config.text.footer);
     }
 
     // Populate Themes
-    themes = normalizeOverlayManifest(config) || [];
+    const rawThemes = normalizeOverlayManifest(config) || [];
+
+    // Convert 'files' to 'formats'
+    themes = await Promise.all(rawThemes.map(async (t) => {
+      // buildFormatsForFiles expects (files, basePath)
+      const fmt = await buildFormatsForFiles(t.files, t.path);
+      return { ...t, formats: fmt };
+    }));
 
     if (applyFallbackIfEmpty(themes)) return;
     populateThemeSelect(themes);
@@ -235,8 +252,14 @@ async function initThemesAndFormats() {
   } catch (err) {
     console.error("Config-Laden fehlgeschlagen, nutze Defaults", err);
     // Fallback if server fails (uses previously cached BUILT_IN_MANIFEST if available, effectively empty here as we moved it)
-    themes = normalizeOverlayManifest(BUILT_IN_MANIFEST);
-    if (themes && themes.length) {
+    // Fallback if server fails
+    const rawThemes = normalizeOverlayManifest(BUILT_IN_MANIFEST);
+    if (rawThemes && rawThemes.length) {
+      themes = await Promise.all(rawThemes.map(async (t) => {
+        const fmt = await buildFormatsForFiles(t.files, t.path);
+        return { ...t, formats: fmt };
+      }));
+
       populateThemeSelect(themes);
       setTheme(themes[0].name);
     } else {
@@ -245,11 +268,8 @@ async function initThemesAndFormats() {
   }
 }
 
-selectButton.addEventListener("click", (e) => {
-  // label for=fileInput öffnet nativ; als Fallback klicken wir per JS
-  e.preventDefault();
-  openFilePicker();
-});
+// selectButton is a <label>, so clicking it triggers the input natively.
+// We only need the keydown listener for keyboard accessibility.
 selectButton.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();
@@ -263,10 +283,18 @@ dropzone.addEventListener("click", (e) => {
     openFilePicker();
   }
 });
-fileInput.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
-  if (file) handleFile(file);
-});
+console.log("Adding change listener to fileInput", fileInput);
+fileInput.onchange = (e) => {
+  try {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  } catch (err) {
+    console.error("Error in onchange:", err);
+    showModal("Fehler bei der Dateiauswahl: " + err.message);
+  }
+};
 
 if (clearFileBtn) {
   clearFileBtn.addEventListener("click", (e) => {
@@ -311,6 +339,15 @@ document.addEventListener("keydown", (e) => {
 
 function startBootAnimation() {
   if (!bootOverlay) return;
+
+  // SAFETY: Force removal after 6s max (in case transitions fail or tab is backgrounded)
+  setTimeout(() => {
+    document.body.classList.remove("is-booting");
+    document.body.classList.remove("is-boot-exiting");
+    if (bootOverlay && bootOverlay.parentNode) bootOverlay.remove();
+    startIntroRevealSequence();
+  }, 6000);
+
   document.body.classList.add("is-booting");
   restartProgressAnimation(bootOverlay);
   window.setTimeout(() => {
@@ -550,20 +587,25 @@ generateBtn.addEventListener("click", async () => {
 zipBtn.addEventListener("click", () => downloadZip().catch(console.error));
 
 function handleFile(file) {
+  // IMMEDIATE FEEDBACK
+  if (fileName) fileName.textContent = "Verarbeite: " + file.name;
+
   const isPng = file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
   const isJpeg =
     file.type === "image/jpeg" ||
     file.type === "image/jpg" ||
     file.name.toLowerCase().endsWith(".jpg") ||
     file.name.toLowerCase().endsWith(".jpeg");
+
   if (!isPng && !isJpeg) {
     showModal("Bitte lade nur PNG oder JPG hoch.", "Upload nicht möglich");
     resetToStart();
     return;
   }
-  // Eingabebild laden und UI freischalten
+
   state.sourceName = file.name.replace(/\.[^/.]+$/, "");
   const reader = new FileReader();
+
   reader.onload = () => {
     const img = new Image();
     img.onload = () => {
@@ -577,7 +619,7 @@ function handleFile(file) {
 
       if (minRequiredHeight && img.height < minRequiredHeight) {
         showModal(
-          `Bildhöhe zu klein.\n\nErforderlich: mindestens ${minRequiredHeight} px(75 % der größten Vorlage mit ${maxOverlayHeight}px Höhe).\nDein Bild: ${img.height} px.`,
+          `Bildhöhe zu klein.\n\nErforderlich: mindestens ${minRequiredHeight} px (75 % der größten Vorlage mit ${maxOverlayHeight}px Höhe).\nDein Bild: ${img.height} px.`,
           "Upload nicht möglich",
         );
         resetToStart();
@@ -589,11 +631,14 @@ function handleFile(file) {
       fileName.textContent = `${file.name} (${img.width} × ${img.height})`;
       toggleGenerate(true);
     };
-    img.onerror = () => showModal("Das Bild konnte nicht geladen werden.", "Upload nicht möglich");
+    img.onerror = (e) => {
+      showModal("Das Bild konnte nicht geladen werden.", "Upload nicht möglich");
+    }
     img.src = reader.result;
   };
   reader.readAsDataURL(file);
-  // erlaubt erneutes Auswählen derselben Datei
+
+  // Reset input immediately to allow re-selection
   fileInput.value = "";
 }
 

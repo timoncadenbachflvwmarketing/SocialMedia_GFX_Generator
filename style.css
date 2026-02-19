@@ -898,10 +898,25 @@ body.has-results main {
 .upload-actions {
   display: flex;
   justify-content: center;
+  position: relative;
+  /* Context for absolute input */
 }
 
+/* Safari Fix: Input covers the button completely */
 .upload-actions input[type="file"] {
-  display: none;
+  position: absolute;
+  inset: 0;
+  /* Top/Left/Right/Bottom: 0 */
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  /* Invisible */
+  cursor: pointer;
+  /* Hand cursor */
+  z-index: 10;
+  /* On top of the label */
+  font-size: 0;
+  /* Prevent text selection quirks */
 }
 
 .upload-button {
