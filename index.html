@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=4" defer></script>
 </head>
 
 <body class="is-booting">
@@ -49,8 +49,8 @@
       <div class="section-inner hero">
         <div class="upload-card tilt-panel intro-reveal" id="dropzone" data-intro="upload">
           <img src="assets/upload_icon.svg?v=2" alt="Upload Icon" width="70" height="70">
-          <h2>REWE Trikot-Aktion</h2>
-          <p class="hero-sub">Einfach Teamfoto auswählen, um unseren Social Media Grafik Generator zu
+          <h2 id="heroTitle">REWE Trikot-Aktion</h2>
+          <p class="hero-sub" id="heroSub">Einfach Teamfoto auswählen, um unseren Social Media Grafik Generator zu
             verwenden.</p>
           <div class="upload-actions" id="uploadActions">
             <input type="file" id="fileInput" accept="image/png,image/jpeg">
@@ -83,10 +83,11 @@
         </div>
         <div class="steps">
           <h3 class="intro-reveal" data-intro="step">So gehts:</h3>
-          <p class="intro-reveal" data-intro="step">1. Foto hochladen</p>
-          <p class="intro-reveal" data-intro="step">2. Grafik erstellen</p>
-          <p class="intro-reveal" data-intro="step">3. Direkt herunterladen – fertig für Social-Media!</p>
-          <p class="intro-reveal" data-intro="step" style="margin-top: 10px; color: var(--accent);">Mit etwas Glück
+          <p class="intro-reveal" id="step1" data-intro="step">1. Foto hochladen</p>
+          <p class="intro-reveal" id="step2" data-intro="step">2. Grafik erstellen</p>
+          <p class="intro-reveal" id="step3" data-intro="step">3. Direkt herunterladen – fertig für Social-Media!</p>
+          <p class="intro-reveal" id="stepExtra" data-intro="step" style="margin-top: 10px; color: var(--accent);">Mit
+            etwas Glück
             gewinnt ihr ein Materialpaket für euer Team!</p>
         </div>
         <button class="ghost hidden" id="newUploadBtn" type="button">Neuer Upload</button>
@@ -152,7 +153,7 @@
     </div>
   </div>
 
-  <div class="disclaimer">FLVW Marketing GmbH | Jahnstraße 76-78 | 59174 Kamen</div>
+  <div class="disclaimer" id="footerText">FLVW Marketing GmbH | Jahnstraße 76-78 | 59174 Kamen</div>
 </body>
 
 </html>

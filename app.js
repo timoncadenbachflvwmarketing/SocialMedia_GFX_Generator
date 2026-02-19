@@ -206,14 +206,42 @@ let currentTheme = null;
 async function initThemesAndFormats() {
   try {
     toggleThemeLoading(true);
-    // Themes & Formate anhand des Overlay-Verzeichnisses ermitteln
-    themes = await discoverThemes();
+
+    // Fetch config from server
+    const res = await fetch(`/api/config?v=${Date.now()}`);
+    if (!res.ok) throw new Error("Config not loaded");
+    const config = await res.json();
+
+    // Populate Text
+    if (config.text) {
+      if (config.text.heroTitle && document.getElementById("heroTitle")) {
+        document.getElementById("heroTitle").textContent = config.text.heroTitle;
+      }
+      if (config.text.heroSub) document.getElementById("heroSub").textContent = config.text.heroSub;
+      if (config.text.step1) document.getElementById("step1").textContent = config.text.step1;
+      if (config.text.step2) document.getElementById("step2").textContent = config.text.step2;
+      if (config.text.step3) document.getElementById("step3").textContent = config.text.step3;
+      if (config.text.stepExtra) document.getElementById("stepExtra").textContent = config.text.stepExtra;
+      if (config.text.footer) document.getElementById("footerText").textContent = config.text.footer;
+    }
+
+    // Populate Themes
+    themes = normalizeOverlayManifest(config) || [];
+
     if (applyFallbackIfEmpty(themes)) return;
     populateThemeSelect(themes);
     setTheme(themes[0].name);
+
   } catch (err) {
-    console.error("Overlay-Ermittlung fehlgeschlagen, nutze Defaults", err);
-    applyFallbackIfEmpty([]);
+    console.error("Config-Laden fehlgeschlagen, nutze Defaults", err);
+    // Fallback if server fails (uses previously cached BUILT_IN_MANIFEST if available, effectively empty here as we moved it)
+    themes = normalizeOverlayManifest(BUILT_IN_MANIFEST);
+    if (themes && themes.length) {
+      populateThemeSelect(themes);
+      setTheme(themes[0].name);
+    } else {
+      applyFallbackIfEmpty([]);
+    }
   }
 }
 
