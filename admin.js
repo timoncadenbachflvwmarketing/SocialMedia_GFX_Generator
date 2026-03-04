@@ -40,6 +40,112 @@ function renderTextConfig() {
     document.getElementById('text_footer').value = config.text.footer || '';
 }
 
+// Make globally available for inline onclick
+window.deleteOverlay = async function (themeIndex, key) {
+    if (!confirm('Overlay wirklich löschen?')) return;
+
+    // Deleting the logical entry. 
+    // Ideally we also delete the physical file IF no other key uses it, but that's complex logic.
+    // For now, we just remove the config entry as requested "Motive verwalten".
+
+    const theme = config.themes[themeIndex];
+    const idx = theme.files.findIndex(f => f.key === key);
+    if (idx >= 0) {
+        theme.files.splice(idx, 1);
+        await saveConfig(true);
+        renderThemes();
+    }
+};
+
+window.updateFileLabel = async function (themeIndex, key, newLabel) {
+    const theme = config.themes[themeIndex];
+    const file = theme.files.find(f => f.key === key);
+    if (file) {
+        file.label = newLabel;
+        await saveConfig(true); // Silent save
+        // Optional: show small feedback?
+        // showToast('Label gespeichert', 'success'); 
+    }
+};
+
+async function handleSmartUpload(event, themeIndex) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+
+    let uploadedCount = 0;
+    let errors = [];
+
+    const theme = config.themes[themeIndex];
+    if (!theme.files) theme.files = [];
+
+    // Show loading state could be nice here
+    showToast(`Verarbeite ${files.length} Dateien...`, 'success');
+
+    for (const file of files) {
+        try {
+            // 1. Get Dimensions
+            const dims = await getImageDimensions(file);
+            console.log(`Analyzed ${file.name}: ${dims.w}x${dims.h}`);
+
+            // 2. Find Matches
+            const matches = FORMAT_SPECS.filter(spec => spec.w === dims.w && spec.h === dims.h);
+
+            if (matches.length === 0) {
+                errors.push(`${file.name}: Keine passende Auflösung (${dims.w}x${dims.h})`);
+                continue;
+            }
+
+            // 3. Upload File
+            const targetPath = `overlays/${theme.path}${file.name}`;
+            await uploadFile(file, targetPath);
+
+            // 4. Update Config for ALL matches
+            matches.forEach(match => {
+                // Find existing entry or create new
+                const existingIdx = theme.files.findIndex(f => f.key === match.key);
+
+                // Use dimensions as default label for new uploads
+                const defaultLabel = `${match.w} x ${match.h}`;
+
+                const entry = {
+                    key: match.key,
+                    label: defaultLabel,
+                    width: match.w,
+                    height: match.h,
+                    overlay: file.name,
+                    filename: match.filename
+                };
+
+                if (existingIdx >= 0) {
+                    // Start: Preserve existing label if it was manually edited? 
+                    // Requirement says "nur die Dimensionen hinschreiben". 
+                    // If we overwrite, we lose custom names on re-upload. 
+                    // Let's overwrite for now as it seems to be a "Reset/New" action.
+                    theme.files[existingIdx] = entry;
+                } else {
+                    theme.files.push(entry);
+                }
+            });
+
+            uploadedCount++;
+
+        } catch (err) {
+            console.error(err);
+            errors.push(`${file.name}: Fehler beim Lesen/Upload`);
+        }
+    }
+
+    if (uploadedCount > 0) {
+        await saveConfig(true);
+        renderThemes();
+        showToast(`${uploadedCount} Dateien erfolgreich verarbeitet!`, 'success');
+    }
+
+    if (errors.length > 0) {
+        setTimeout(() => alert("Einige Dateien wurden übersprungen:\n" + errors.join("\n")), 500);
+    }
+}
+
 function renderThemes() {
     const list = document.getElementById('themesList');
     list.innerHTML = '';
@@ -70,7 +176,12 @@ function renderThemes() {
                     <div class="delete-overlay" onclick="window.deleteOverlay(${index}, '${file.key}')">&times;</div>
                     <img src="overlays/${theme.path}${file.overlay}?v=${Date.now()}" class="file-preview">
                     <div class="file-info">
-                        <strong>${file.label}</strong><br>
+                        <input type="text" 
+                               class="file-label-input" 
+                               value="${file.label}" 
+                               onchange="window.updateFileLabel(${index}, '${file.key}', this.value)"
+                               title="Beschriftung bearbeiten">
+                        <br>
                         <span style="color:#666">${file.width}x${file.height}</span><br>
                         <span class="file-tag">${file.overlay}</span>
                     </div>
@@ -82,107 +193,6 @@ function renderThemes() {
         list.appendChild(clone);
     });
 }
-
-async function handleSmartUpload(event, themeIndex) {
-    const files = Array.from(event.target.files);
-    if (!files.length) return;
-
-    let uploadedCount = 0;
-    let errors = [];
-
-    const theme = config.themes[themeIndex];
-    if (!theme.files) theme.files = [];
-
-    // Show loading state could be nice here
-    showToast(`Verarbeite ${files.length} Dateien...`, 'success');
-
-    for (const file of files) {
-        try {
-            // 1. Get Dimensions
-            const dims = await getImageDimensions(file);
-            console.log(`Analyzed ${file.name}: ${dims.w}x${dims.h}`);
-
-            // 2. Find Matches
-            const matches = FORMAT_SPECS.filter(spec => spec.w === dims.w && spec.h === dims.h);
-
-            if (matches.length === 0) {
-                errors.push(`${file.name}: Keine passende Auflösung (${dims.w}x${dims.h})`);
-                continue;
-            }
-
-            // 3. Upload File
-            // We upload ONE physical file, but we might map it to multiple keys (e.g. FB & Insta share 4:5 resolution)
-            // Or we check if matches.length > 1 and apply to all suitable keys.
-            // User requirement: "Name etc. automatisch ausgelesen". 
-            // Implementation: If 1080x1350 is found, we map it to both facebook_post_4x5 AND instagram_post_4x5
-
-            const targetPath = `overlays/${theme.path}${file.name}`;
-            await uploadFile(file, targetPath);
-
-            // 4. Update Config for ALL matches
-            matches.forEach(match => {
-                // Find existing entry or create new
-                const existingIdx = theme.files.findIndex(f => f.key === match.key);
-                const entry = {
-                    key: match.key,
-                    label: match.label,
-                    width: match.w,
-                    height: match.h,
-                    overlay: file.name,
-                    filename: match.filename
-                };
-
-                if (existingIdx >= 0) {
-                    theme.files[existingIdx] = entry;
-                } else {
-                    theme.files.push(entry);
-                }
-            });
-
-            uploadedCount++;
-
-        } catch (err) {
-            console.error(err);
-            errors.push(`${file.name}: Fehler beim Lesen/Upload`);
-        }
-    }
-
-    if (uploadedCount > 0) {
-        await saveConfig(true);
-        renderThemes();
-        showToast(`${uploadedCount} Dateien erfolgreich verarbeitet!`, 'success');
-    }
-
-    if (errors.length > 0) {
-        setTimeout(() => alert("Einige Dateien wurden übersprungen:\n" + errors.join("\n")), 500);
-    }
-}
-
-function getImageDimensions(file) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve({ w: img.width, h: img.height });
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
-    });
-}
-
-// Make globally available for inline onclick
-window.deleteOverlay = async function (themeIndex, key) {
-    if (!confirm('Overlay wirklich löschen?')) return;
-
-    // Deleting the logical entry. 
-    // Ideally we also delete the physical file IF no other key uses it, but that's complex logic.
-    // For now, we just remove the config entry as requested "Motive verwalten".
-
-    const theme = config.themes[themeIndex];
-    const idx = theme.files.findIndex(f => f.key === key);
-    if (idx >= 0) {
-        theme.files.splice(idx, 1);
-        await saveConfig(true);
-        renderThemes();
-    }
-};
 
 async function deleteTheme(index) {
     if (!confirm('Motiv wirklich löschen?')) return;
@@ -244,7 +254,11 @@ async function uploadFile(file, path) {
     formData.append('file', file);
     formData.append('path', path);
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Upload failed');
+    if (!res.ok) {
+        const text = await res.text();
+        console.error(`Upload failed: ${res.status} ${res.statusText}`, text);
+        throw new Error(`Upload failed: ${res.status} ${res.statusText} - ${text}`);
+    }
 }
 
 async function saveConfig(silent = false) {
@@ -265,4 +279,19 @@ function showToast(msg, type = 'success') {
     el.textContent = msg;
     el.className = `toast ${type} show`;
     setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function getImageDimensions(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            resolve({ w: img.width, h: img.height });
+            URL.revokeObjectURL(img.src);
+        };
+        img.onerror = () => {
+            reject(new Error("Bild konnte nicht geladen werden."));
+            URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
+    });
 }

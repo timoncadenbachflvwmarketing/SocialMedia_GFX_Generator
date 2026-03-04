@@ -282,6 +282,31 @@
             font-weight: 600;
         }
 
+        .file-label-input {
+            width: 100%;
+            padding: 4px;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background: transparent;
+            color: inherit;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .file-label-input:hover {
+            border-color: #ddd;
+            background: #fff;
+        }
+
+        .file-label-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+        }
+
         .delete-overlay {
             position: absolute;
             top: 5px;
@@ -325,7 +350,7 @@
             background: var(--danger);
         }
     </style>
-    <script src="admin.js?v=4" defer></script>
+    <script src="admin.js?v=6" defer></script>
 </head>
 
 <body>
