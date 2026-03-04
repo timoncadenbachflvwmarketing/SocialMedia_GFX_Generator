@@ -363,6 +363,7 @@
             <nav>
                 <a href="#texts" class="nav-link active">Texte & Inhalte</a>
                 <a href="#themes" class="nav-link">Motive & Design</a>
+                <a href="#anleitung" class="nav-link">Anleitung</a>
                 <a href="/" class="nav-link" style="margin-top: 40px; color: var(--primary);">Zum Generator &rarr;</a>
             </nav>
         </aside>
@@ -437,10 +438,56 @@
 
                 <div id="themesList"></div>
             </section>
+            <section id="anleitung" class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Anleitung (FAQ) bearbeiten</h2>
+                    <button id="addGuideBtn" class="btn btn-ghost">Abschnitt hinzufügen</button>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Hier kannst du die Inhalte
+                    der Anleitungs-Seite anpassen. Verwende simple HTML-Tags für Formatierungen, z.B.
+                    <code>&lt;strong&gt;fett&lt;/strong&gt;</code> oder <code>&lt;br&gt;</code> für Zeilenumbrüche.
+                </p>
+                <div id="guideList"></div>
+            </section>
         </main>
     </div>
 
     <div id="toast" class="toast">Nachricht</div>
+
+    <!-- Template for Guide Section -->
+    <template id="guideTemplate">
+        <div class="card theme-card guide-item" draggable="true"
+            style="margin-bottom: 16px; padding: 16px; cursor: move; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div class="drag-handle"
+                    style="padding-right: 12px; color: var(--text-muted); font-size: 1.2rem; cursor: grab; align-self: center;"
+                    title="Ziehen zum Sortieren">⋮⋮</div>
+                <div
+                    style="flex: 1; display: grid; grid-template-columns: 80px 1fr 1fr; gap: 12px; align-items: center;">
+                    <div>
+                        <label style="font-size: 0.75rem;">Icon (Text/Emoji)</label>
+                        <input type="text" class="guide-icon" placeholder="z.B. ✦"
+                            style="padding: 6px; text-align: center;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">Menü-Titel (Kurz)</label>
+                        <input type="text" class="guide-menu-title" placeholder="z.B. Wofür gedacht?">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">Haupt-Titel (H3)</label>
+                        <input type="text" class="guide-title" placeholder="z.B. Wofür ist der Generator gedacht?">
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-ghost delete-guide-btn"
+                    style="padding: 6px 10px; font-size: 0.8rem; margin-left: 16px;">Löschen</button>
+            </div>
+            <div>
+                <label style="font-size: 0.75rem;">Inhalt (HTML erlaubt)</label>
+                <textarea class="guide-content-html" rows="4"
+                    style="font-family: monospace; font-size: 0.85rem; line-height: 1.4;"></textarea>
+            </div>
+        </div>
+    </template>
 
     <!-- Template for Theme Item -->
     <template id="themeTemplate">

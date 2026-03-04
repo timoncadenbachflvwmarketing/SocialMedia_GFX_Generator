@@ -1,4 +1,5 @@
 let config = null;
+let dragSrcEl = null;
 
 // Definition used for auto-detection
 const FORMAT_SPECS = [
@@ -21,8 +22,23 @@ async function loadConfig() {
     try {
         const res = await fetch('/api/config?v=' + Date.now());
         config = await res.json();
+
+        // Ensure default guide sections exist
+        if (!config.guide) {
+            config.guide = [
+                { id: "zweck", menuTitle: "Wofür gedacht?", icon: "✦", title: "Wofür ist der Generator gedacht?", content: "Der Social Media Grafik Generator unterstützt Dich dabei, aus einem hochgeladenen Foto schnell konsistente Social-Media-Grafiken zu erstellen.<br>Dabei werden vordefinierte Vorlagen/Overlays (z.B. für Instagram und Facebook) automatisch über Dein Foto gelegt und in die passenden Formate gerendert." },
+                { id: "funktion", menuTitle: "Was macht er?", icon: "▦", title: "Was macht der Generator?", content: "Nach dem Upload erzeugt der Generator mehrere Ausgabeformate (je nach Motiv/Vorlage) und zeigt diese als Vorschau an.<br>Du kannst die generierten Grafiken anschließend einzeln oder gesammelt als ZIP herunterladen.\n<ul class=\"guide-list\">\n  <li>Automatisches Rendern in mehrere Formate</li>\n  <li>Vorschau der Ergebnisse direkt im Browser</li>\n  <li>Feinjustierung des Bildausschnitts über „Motiv ausrichten“</li>\n</ul>" },
+                { id: "bedienung", menuTitle: "Bedienung", icon: "✓", title: "So bedienst Du den Generator", content: "<ol class=\"guide-steps\">\n  <li><strong>Foto hochladen:</strong> Wähle eine PNG- oder JPG-Datei aus oder ziehe sie per Drag-and-Drop in das Upload-Feld.</li>\n  <li><strong>Datei prüfen:</strong> Nach dem Upload siehst Du den Dateinamen und kannst die Datei über das weiße „X“ wieder entfernen.</li>\n  <li><strong>Motiv auswählen:</strong> Wähle das gewünschte Motiv aus (falls verfügbar).</li>\n  <li><strong>Generieren:</strong> Klicke auf „Generieren“, um alle Formate zu erstellen.</li>\n  <li><strong>Feinausrichtung:</strong> Nutze bei Bedarf „Motiv ausrichten“, um den Bildausschnitt zu optimieren.</li>\n</ol>" },
+                { id: "anforderungen", menuTitle: "Datei & Mindesthöhe", icon: "⟡", title: "Wichtige Hinweise (Datei & Mindesthöhe)", content: "Es werden ausschließlich <strong>PNG</strong>- und <strong>JPG</strong>-Dateien akzeptiert. Zusätzlich muss Dein Bild eine Mindesthöhe erfüllen, damit die Vorlagen sauber angewendet werden können.\n<div class=\"guide-callout\">\n  <p class=\"muted\">\n    <strong>Mindesthöhe:</strong> mindestens <strong>75%</strong> der Höhe der größten verwendeten Vorlage (Overlay).\n    Beispiel: Wenn die größte Vorlage <strong>1920px</strong> hoch ist, muss Dein Bild mindestens <strong>1440px</strong> hoch sein.\n  </p>\n</div>\nWenn die Datei nicht geeignet ist (z.B. falsches Dateiformat oder zu geringe Höhe), erscheint eine Meldung als Popup mit der genauen Fehlerbeschreibung." },
+                { id: "downloads", menuTitle: "Downloads", icon: "⬇", title: "Downloads", content: "Du kannst die Grafiken entweder <strong>einzeln</strong> pro Ergebnis-Kachel herunterladen oder gesammelt als <strong>ZIP</strong>.<br>Der ZIP-Download bündelt alle generierten Formate in einer Datei." },
+                { id: "menue", menuTitle: "Menü", icon: "☰", title: "Menü (oben rechts)", content: "Über das Menü kannst Du jederzeit einen „Neuen Upload“ starten. Der Punkt „Alle herunterladen“ ist erst aktiv, sobald Ergebnisse generiert wurden.<br>Außerdem gelangst Du von dort direkt zur Anleitung." }
+            ];
+            await saveConfig(true); // Save defaults back
+        }
+
         renderTextConfig();
         renderThemes();
+        renderGuide();
     } catch (err) {
         showToast('Fehler beim Laden der Konfiguration', 'error');
         console.error(err);
@@ -247,6 +263,51 @@ async function deleteTheme(index) {
     renderThemes();
 }
 
+function renderGuide() {
+    const list = document.getElementById('guideList');
+    list.innerHTML = '';
+    const tmpl = document.getElementById('guideTemplate');
+
+    (config.guide || []).forEach((section, index) => {
+        const clone = tmpl.content.cloneNode(true);
+
+        const itemEl = clone.querySelector('.guide-item');
+        itemEl.dataset.id = section.id;
+
+        const inputIcon = clone.querySelector('.guide-icon');
+        const inputMenuTitle = clone.querySelector('.guide-menu-title');
+        const inputTitle = clone.querySelector('.guide-title');
+        const inputContent = clone.querySelector('.guide-content-html');
+
+        inputIcon.value = section.icon || '';
+        inputMenuTitle.value = section.menuTitle || '';
+        inputTitle.value = section.title || '';
+        inputContent.value = section.content || '';
+
+        // Auto resize textarea (rudimentary)
+        inputContent.style.height = 'auto';
+        inputContent.style.height = (inputContent.scrollHeight + 5) + 'px';
+
+        clone.querySelector('.delete-guide-btn').addEventListener('click', () => {
+            if (confirm('Abschnitt wirklich löschen?')) {
+                config.guide.splice(index, 1);
+                saveConfig(true);
+                renderGuide();
+            }
+        });
+
+        // Add Drag and Drop Handlers
+        itemEl.addEventListener('dragstart', handleDragStart);
+        itemEl.addEventListener('dragover', handleDragOver);
+        itemEl.addEventListener('drop', handleDrop);
+        itemEl.addEventListener('dragenter', handleDragEnter);
+        itemEl.addEventListener('dragleave', handleDragLeave);
+        itemEl.addEventListener('dragend', handleDragEnd);
+
+        list.appendChild(clone);
+    });
+}
+
 function setupEventListeners() {
     document.getElementById('saveConfigBtn').addEventListener('click', () => {
         updateConfigFromUI();
@@ -261,6 +322,18 @@ function setupEventListeners() {
         document.getElementById('newThemeName').value = '';
         saveConfig(true);
         renderThemes();
+    });
+
+    document.getElementById('addGuideBtn').addEventListener('click', () => {
+        config.guide.push({
+            id: 'sect_' + Date.now(),
+            icon: '✦',
+            menuTitle: 'Neuer Abschnitt',
+            title: 'Titel hier eingeben',
+            content: 'Inhalt hier als Text oder HTML eingeben...'
+        });
+        saveConfig(true);
+        renderGuide();
     });
 
     document.getElementById('logoUpload').addEventListener('change', async (e) => {
@@ -287,6 +360,72 @@ function updateConfigFromUI() {
         stepExtra: document.getElementById('text_stepExtra').value,
         footer: document.getElementById('text_footer').value
     };
+
+    // Update guide entries from UI
+    const newGuide = [];
+    const guideItems = document.getElementById('guideList').children;
+    for (let i = 0; i < guideItems.length; i++) {
+        const item = guideItems[i];
+        newGuide.push({
+            id: item.dataset.id || ('sect_' + Date.now() + i),
+            icon: item.querySelector('.guide-icon').value,
+            menuTitle: item.querySelector('.guide-menu-title').value,
+            title: item.querySelector('.guide-title').value,
+            content: item.querySelector('.guide-content-html').value
+        });
+    }
+    config.guide = newGuide;
+}
+
+// Drag & Drop Handlers
+function handleDragStart(e) {
+    this.style.opacity = '0.4';
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDragEnter(e) {
+    this.style.boxShadow = '0 0 0 2px var(--accent)';
+}
+
+function handleDragLeave(e) {
+    this.style.boxShadow = '';
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) e.stopPropagation();
+    if (dragSrcEl !== this) {
+        const list = document.getElementById('guideList');
+        // Simple heuristic to determine drop placement (before or after)
+        const allItems = Array.from(list.children);
+        const dropIndex = allItems.indexOf(this);
+        const dragIndex = allItems.indexOf(dragSrcEl);
+
+        if (dragIndex < dropIndex) {
+            this.parentNode.insertBefore(dragSrcEl, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(dragSrcEl, this);
+        }
+
+        updateConfigFromUI();
+        saveConfig(true);
+    }
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.style.opacity = '1';
+    let items = document.querySelectorAll('.guide-item');
+    items.forEach(function (item) {
+        item.style.boxShadow = '';
+    });
 }
 
 async function uploadFile(file, path) {

@@ -40,111 +40,13 @@
         <div class="upload-card guide-card">
           <div class="guide-grid">
             <aside class="info-panel guide-toc" aria-label="Inhaltsverzeichnis">
-              <nav>
-                <a class="toc-link" href="#zweck">Wofür gedacht?</a>
-                <a class="toc-link" href="#funktion">Was macht er?</a>
-                <a class="toc-link" href="#bedienung">Bedienung</a>
-                <a class="toc-link" href="#anforderungen">Datei & Mindesthöhe</a>
-                <a class="toc-link" href="#downloads">Downloads</a>
-                <a class="toc-link" href="#menue">Menü</a>
+              <nav id="guideNav">
+                <!-- Links will be inserted here dynamically -->
               </nav>
             </aside>
 
-            <div class="guide-content">
-              <section class="info-panel" id="zweck">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">✦</span>
-                  <h3>Wofür ist der Generator gedacht?</h3>
-                </div>
-                <p class="muted">
-                  Der Social Media Grafik Generator unterstützt Dich dabei, aus einem hochgeladenen Foto schnell
-                  konsistente Social-Media-Grafiken zu erstellen.
-                  Dabei werden vordefinierte Vorlagen/Overlays (z.B. für Instagram und Facebook) automatisch über Dein
-                  Foto gelegt und in die passenden Formate gerendert.
-                </p>
-              </section>
-
-              <section class="info-panel" id="funktion">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">▦</span>
-                  <h3>Was macht der Generator?</h3>
-                </div>
-                <p class="muted">
-                  Nach dem Upload erzeugt der Generator mehrere Ausgabeformate (je nach Motiv/Vorlage) und zeigt diese
-                  als Vorschau an.
-                  Du kannst die generierten Grafiken anschließend einzeln oder gesammelt als ZIP herunterladen.
-                </p>
-                <ul class="guide-list">
-                  <li>Automatisches Rendern in mehrere Formate</li>
-                  <li>Vorschau der Ergebnisse direkt im Browser</li>
-                  <li>Feinjustierung des Bildausschnitts über „Motiv ausrichten“</li>
-                </ul>
-              </section>
-
-              <section class="info-panel" id="bedienung">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">✓</span>
-                  <h3>So bedienst Du den Generator</h3>
-                </div>
-                <ol class="guide-steps">
-                  <li><strong>Foto hochladen:</strong> Wähle eine PNG- oder JPG-Datei aus oder ziehe sie per
-                    Drag-and-Drop in das Upload-Feld.</li>
-                  <li><strong>Datei prüfen:</strong> Nach dem Upload siehst Du den Dateinamen und kannst die Datei über
-                    das weiße „X“ wieder entfernen.</li>
-                  <li><strong>Motiv auswählen:</strong> Wähle das gewünschte Motiv aus (falls verfügbar).</li>
-                  <li><strong>Generieren:</strong> Klicke auf „Generieren“, um alle Formate zu erstellen.</li>
-                  <li><strong>Feinausrichtung:</strong> Nutze bei Bedarf „Motiv ausrichten“, um den Bildausschnitt zu
-                    optimieren.</li>
-                </ol>
-              </section>
-
-              <section class="info-panel" id="anforderungen">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">⟡</span>
-                  <h3>Wichtige Hinweise (Datei & Mindesthöhe)</h3>
-                </div>
-                <p class="muted">
-                  Es werden ausschließlich <strong>PNG</strong>- und <strong>JPG</strong>-Dateien akzeptiert. Zusätzlich
-                  muss Dein Bild eine Mindesthöhe erfüllen,
-                  damit die Vorlagen sauber angewendet werden können.
-                </p>
-                <div class="guide-callout">
-                  <p class="muted">
-                    <strong>Mindesthöhe:</strong> mindestens <strong>75%</strong> der Höhe der größten verwendeten
-                    Vorlage (Overlay).
-                    Beispiel: Wenn die größte Vorlage <strong>1920px</strong> hoch ist, muss Dein Bild mindestens
-                    <strong>1440px</strong> hoch sein.
-                  </p>
-                </div>
-                <p class="muted">
-                  Wenn die Datei nicht geeignet ist (z.B. falsches Dateiformat oder zu geringe Höhe), erscheint eine
-                  Meldung als Popup mit der genauen Fehlerbeschreibung.
-                </p>
-              </section>
-
-              <section class="info-panel" id="downloads">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">⬇</span>
-                  <h3>Downloads</h3>
-                </div>
-                <p class="muted">
-                  Du kannst die Grafiken entweder <strong>einzeln</strong> pro Ergebnis-Kachel herunterladen oder
-                  gesammelt als <strong>ZIP</strong>.
-                  Der ZIP-Download bündelt alle generierten Formate in einer Datei.
-                </p>
-              </section>
-
-              <section class="info-panel" id="menue">
-                <div class="panel-head">
-                  <span class="panel-icon" aria-hidden="true">☰</span>
-                  <h3>Menü (oben rechts)</h3>
-                </div>
-                <p class="muted">
-                  Über das Menü kannst Du jederzeit einen „Neuen Upload“ starten. Der Punkt „Alle herunterladen“ ist
-                  erst aktiv, sobald Ergebnisse generiert wurden.
-                  Außerdem gelangst Du von dort direkt zur Anleitung.
-                </p>
-              </section>
+            <div class="guide-content" id="guideContent">
+              <!-- Content panels will be inserted here dynamically -->
             </div>
           </div>
         </div>
@@ -152,7 +54,7 @@
     </section>
   </main>
 
-  <div class="disclaimer">FLVW Marketing GmbH | Jahnstraße 76-78 | 59174 Kamen</div>
+  <div class="disclaimer" id="footerText">FLVW Marketing GmbH | Jahnstraße 76-78 | 59174 Kamen</div>
 
   <script>
     const menuBtn = document.getElementById("menuBtn");
@@ -182,6 +84,51 @@
         if (e.key === "Escape") closeMenu();
       });
     }
+
+    // Dynamic Content Loading
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/config?v=' + Date.now());
+        const config = await res.json();
+
+        // Populate Footer
+        if (config.text && config.text.footer) {
+          document.getElementById('footerText').textContent = config.text.footer;
+        }
+
+        // Populate Guide Sections
+        if (config.guide) {
+          const navContainer = document.getElementById('guideNav');
+          const contentContainer = document.getElementById('guideContent');
+
+          config.guide.forEach(section => {
+            // Build Nav Link
+            const link = document.createElement('a');
+            link.className = 'toc-link';
+            link.href = '#' + section.id;
+            link.textContent = section.menuTitle;
+            navContainer.appendChild(link);
+
+            // Build Content Panel
+            const panel = document.createElement('section');
+            panel.className = 'info-panel';
+            panel.id = section.id;
+
+            panel.innerHTML = `
+              <div class="panel-head">
+                <span class="panel-icon" aria-hidden="true">${section.icon}</span>
+                <h3>${section.title}</h3>
+              </div>
+              <p class="muted">${section.content}</p>
+            `;
+            contentContainer.appendChild(panel);
+          });
+        }
+
+      } catch (err) {
+        console.error("Failed to load config for guide page", err);
+      }
+    });
   </script>
 </body>
 
