@@ -235,6 +235,10 @@ async function initThemesAndFormats() {
       setText("footerText", config.text.footer);
     }
 
+    if (config.theme) {
+      applyTheme(config.theme);
+    }
+
     // Populate Themes
     const rawThemes = normalizeOverlayManifest(config) || [];
 
@@ -266,6 +270,60 @@ async function initThemesAndFormats() {
       applyFallbackIfEmpty([]);
     }
   }
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+}
+
+function applyTheme(theme) {
+  if (!theme) return;
+
+  let style = document.getElementById('dynamic-theme');
+  if (!style) {
+    style = document.createElement('style');
+    style.id = 'dynamic-theme';
+    document.head.appendChild(style);
+  }
+
+  const rgb = hexToRgb(theme.accent || '#cc071e');
+  const isDark = theme.glass === 'dark';
+
+  // Build the dynamic CSS variables string
+  style.innerHTML = `
+        :root {
+            --accent: ${theme.accent};
+            --accent-rgb: ${rgb};
+            --accent-strong: ${theme.accentDark || 'color-mix(in srgb, var(--accent) 80%, black)'};
+            --accent-hover: ${theme.accentDark || 'color-mix(in srgb, var(--accent) 90%, black)'};
+            --accent-95: rgba(${rgb}, 0.95);
+            --accent-callout-bg: ${theme.accentLight || `rgba(${rgb}, 0.08)`};
+            --accent-callout-border: rgba(${rgb}, 0.15);
+            
+            --cta-green: ${theme.gradientStart ? `linear-gradient(135deg, ${theme.gradientStart}, ${theme.gradientEnd || theme.gradientStart})` : 'var(--accent)'};
+            --cta-green-strong: ${theme.gradientStart ? `linear-gradient(135deg, ${theme.gradientEnd || theme.gradientStart}, ${theme.gradientStart})` : 'var(--accent-strong)'};
+            --cta-green-hover: var(--cta-green-strong);
+            --cta-green-92: rgba(${rgb}, 0.92);
+
+            --page-glow-accent-1: ${theme.accentLight || `rgba(${rgb}, 0.15)`};
+            --page-glow-accent-2: ${theme.accentLight || `rgba(${rgb}, 0.08)`};
+
+            /* Glass Mode Variables */
+            --glass-bg: ${isDark ? 'rgba(30, 30, 30, 0.75)' : 'rgba(255, 255, 255, 0.7)'};
+            --glass-bg-strong: ${isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)'};
+            --glass-border: ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.4)'};
+            --glass-saturate: ${isDark ? '120%' : '180%'};
+            --ui-surface-01: ${isDark ? 'rgba(0,0,0,0.4)' : '#ffffff'};
+            --ui-surface-02: ${isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6'};
+            --ui-surface-06: ${isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'};
+            --text: ${isDark ? '#f3f4f6' : '#333333'};
+            --text-contrast: ${isDark ? '#ffffff' : '#000000'};
+            --text-muted: ${isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.66)'};
+            --text-soft: ${isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0, 0, 0, 0.6)'};
+            --text-dim: ${isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0, 0, 0, 0.4)'};
+        }
+    `;
 }
 
 // selectButton is a <label>, so clicking it triggers the input natively.

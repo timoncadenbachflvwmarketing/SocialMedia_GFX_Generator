@@ -39,7 +39,22 @@ async function loadConfig() {
             await saveConfig(true); // Save defaults back
         }
 
+        // Ensure default theme exists
+        if (!config.theme) {
+            config.theme = {
+                accent: "#cc071e",
+                accentLight: "#fde8eb",
+                accentDark: "#a60517",
+                gradientStart: "#CC071E",
+                gradientEnd: "#a60517",
+                adminAccent: "#009640",
+                glass: "light"
+            };
+            await saveConfig(true);
+        }
+
         renderTextConfig();
+        renderThemeConfig();
         renderThemes();
         renderGuide();
     } catch (err) {
@@ -57,6 +72,26 @@ function renderTextConfig() {
     document.getElementById('text_step3').value = config.text.step3 || '';
     document.getElementById('text_stepExtra').value = config.text.stepExtra || '';
     document.getElementById('text_footer').value = config.text.footer || '';
+}
+
+function renderThemeConfig() {
+    if (!config.theme) return;
+    document.getElementById('theme_accent').value = config.theme.accent || '#cc071e';
+    document.getElementById('theme_accentLight').value = config.theme.accentLight || '#fde8eb';
+    document.getElementById('theme_accentDark').value = config.theme.accentDark || '#a60517';
+    document.getElementById('theme_gradientStart').value = config.theme.gradientStart || '#CC071E';
+    document.getElementById('theme_gradientEnd').value = config.theme.gradientEnd || '#a60517';
+    document.getElementById('theme_adminAccent').value = config.theme.adminAccent || '#009640';
+    document.getElementById('theme_glass').value = config.theme.glass || 'light';
+
+    // Apply admin accent globally for the backend
+    applyAdminTheme(config.theme.adminAccent);
+}
+
+function applyAdminTheme(hexColor) {
+    if (!hexColor) return;
+    document.documentElement.style.setProperty('--primary', hexColor);
+    document.documentElement.style.setProperty('--primary-dark', `color-mix(in srgb, ${hexColor} 80%, black)`);
 }
 
 // Make globally available for inline onclick
@@ -368,6 +403,18 @@ function updateConfigFromUI() {
         stepExtra: document.getElementById('text_stepExtra').value,
         footer: document.getElementById('text_footer').value
     };
+
+    config.theme = {
+        accent: document.getElementById('theme_accent').value,
+        accentLight: document.getElementById('theme_accentLight').value,
+        accentDark: document.getElementById('theme_accentDark').value,
+        gradientStart: document.getElementById('theme_gradientStart').value,
+        gradientEnd: document.getElementById('theme_gradientEnd').value,
+        adminAccent: document.getElementById('theme_adminAccent').value,
+        glass: document.getElementById('theme_glass').value
+    };
+
+    applyAdminTheme(config.theme.adminAccent);
 
     // Update guide entries from UI
     const newGuide = [];

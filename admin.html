@@ -350,18 +350,21 @@
             background: var(--danger);
         }
     </style>
-    <script src="admin.js?v=6" defer></script>
+    <script src="admin.js?v=7" defer></script>
 </head>
 
 <body>
 
     <div class="layout">
         <aside class="sidebar">
-            <div class="brand">
-                <span style="font-size: 1.5rem;">🎨</span> FLVW Admin
+            <div class="sidebar-header">
+                <h2 style="display: flex; align-items: center; gap: 8px;">
+                    SMG Admin
+                </h2>
             </div>
             <nav>
                 <a href="#texts" class="nav-link active">Texte & Inhalte</a>
+                <a href="#thema" class="nav-link">Design & Farben</a>
                 <a href="#themes" class="nav-link">Motive & Design</a>
                 <a href="#anleitung" class="nav-link">Anleitung</a>
                 <a href="/" class="nav-link" style="margin-top: 40px; color: var(--primary);">Zum Generator &rarr;</a>
@@ -438,7 +441,56 @@
 
                 <div id="themesList"></div>
             </section>
-            <section id="anleitung" class="card">
+            <section id="thema" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Design & Farben</h2>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Lege hier die primären
+                    Farben fest. Alle anderen Nuancen für Buttons und Leuchteffekte werden automatisch berechnet.</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Hauptakzent (Normal)</label>
+                        <input type="color" id="theme_accent"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Hellerer Akzent (z.B. Hover/Boxen)</label>
+                        <input type="color" id="theme_accentLight"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Dunklerer Akzent (z.B. Focus)</label>
+                        <input type="color" id="theme_accentDark"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Button Verlauf (Start)</label>
+                        <input type="color" id="theme_gradientStart"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Button Verlauf (Ende)</label>
+                        <input type="color" id="theme_gradientEnd"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Boxen (Glass Helligkeit)</label>
+                        <select id="theme_glass" style="width: 100%; padding: 8px;">
+                            <option value="light">Helles Glas (Standard)</option>
+                            <option value="dark">Dunkles Glas</option>
+                        </select>
+                    </div>
+                    <div class="form-group"
+                        style="grid-column: 1 / -1; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 15px;">
+                        <label>Admin-Panel Akzentfarbe (Ersetzt Standard Grün)</label>
+                        <input type="color" id="theme_adminAccent"
+                            style="width: 100%; height: 40px; cursor: pointer; padding: 2px;">
+                    </div>
+                </div>
+            </section>
+
+            <section id="anleitung" class="card hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Anleitung (FAQ) bearbeiten</h2>
                     <div style="display: flex; gap: 10px;">
