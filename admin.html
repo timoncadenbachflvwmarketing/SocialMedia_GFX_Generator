@@ -441,7 +441,11 @@
             <section id="anleitung" class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Anleitung (FAQ) bearbeiten</h2>
-                    <button id="addGuideBtn" class="btn btn-ghost">Abschnitt hinzufügen</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="resetGuideBtn" class="btn btn-secondary"
+                            style="background: var(--ui-surface-06); color: var(--text);">FAQ zurücksetzen</button>
+                        <button id="addGuideBtn" class="btn btn-ghost">Abschnitt hinzufügen</button>
+                    </div>
                 </div>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Hier kannst du die Inhalte
                     der Anleitungs-Seite anpassen. Verwende simple HTML-Tags für Formatierungen, z.B.

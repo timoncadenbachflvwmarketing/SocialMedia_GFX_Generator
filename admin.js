@@ -11,6 +11,15 @@ const FORMAT_SPECS = [
     { key: 'flvw_werbung', w: 500, h: 500, label: 'Werbung (1:1)', filename: 'flvw_werbung_500x500' }
 ];
 
+const DEFAULT_GUIDE = [
+    { id: "zweck", menuTitle: "Wofür gedacht?", icon: "✦", title: "Wofür ist der Generator gedacht?", content: "Der Social Media Grafik Generator unterstützt Dich dabei, aus einem hochgeladenen Foto schnell konsistente Social-Media-Grafiken zu erstellen.<br>Dabei werden vordefinierte Vorlagen/Overlays (z.B. für Instagram und Facebook) automatisch über Dein Foto gelegt und in die passenden Formate gerendert." },
+    { id: "funktion", menuTitle: "Was macht er?", icon: "▦", title: "Was macht der Generator?", content: "Nach dem Upload erzeugt der Generator mehrere Ausgabeformate (je nach Motiv/Vorlage) und zeigt diese als Vorschau an.<br>Du kannst die generierten Grafiken anschließend einzeln oder gesammelt als ZIP herunterladen.<br><br><ul><li>Automatisches Rendern in mehrere Formate</li><li>Vorschau der Ergebnisse direkt im Browser</li><li>Feinjustierung des Bildausschnitts über „Motiv ausrichten”</li></ul>" },
+    { id: "bedienung", menuTitle: "Bedienung", icon: "✓", title: "So bedienst Du den Generator", content: "<ol><li><strong>Foto hochladen:</strong> Wähle eine Datei aus oder ziehe sie per Drag-and-Drop in das Upload-Feld.</li><li><strong>Datei prüfen:</strong> Nach dem Upload siehst Du den Dateinamen.</li><li><strong>Motiv auswählen:</strong> Wähle das gewünschte Motiv aus (falls verfügbar).</li><li><strong>Generieren:</strong> Klicke auf „Generieren“, um alle Formate zu erstellen.</li><li><strong>Feinausrichtung:</strong> Nutze bei Bedarf „Motiv ausrichten“, um den Bildausschnitt zu optimieren.</li></ol>" },
+    { id: "anforderungen", menuTitle: "Datei & Mindesthöhe", icon: "⟡", title: "Wichtige Hinweise (Datei & Mindesthöhe)", content: "Es werden ausschließlich <strong>PNG</strong>- und <strong>JPG</strong>-Dateien akzeptiert. Zusätzlich muss Dein Bild eine Mindesthöhe erfüllen, damit die Vorlagen sauber angewendet werden können.<br><br><strong>Mindesthöhe:</strong> mindestens <strong>75%</strong> der Höhe der größten verwendeten Vorlage.<br>Beispiel: Wenn die größte Vorlage 1920px hoch ist, muss Dein Bild mindestens 1440px hoch sein.<br><br>Wenn die Datei nicht geeignet ist, erscheint eine Meldung als Popup mit der genauen Fehlerbeschreibung." },
+    { id: "downloads", menuTitle: "Downloads", icon: "⬇", title: "Downloads", content: "Du kannst die Grafiken entweder einzeln pro Ergebnis-Kachel herunterladen oder gesammelt als <strong>ZIP</strong>.<br>Der ZIP-Download bündelt alle generierten Formate in einer Datei." },
+    { id: "menue", menuTitle: "Menü", icon: "☰", title: "Menü (oben rechts)", content: "Über das Menü kannst Du jederzeit einen „Neuen Upload“ starten. Der Punkt „Alle herunterladen“ ist erst aktiv, sobald Ergebnisse generiert wurden.<br>Außerdem gelangst Du von dort direkt zur Anleitung." }
+];
+
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
@@ -25,14 +34,8 @@ async function loadConfig() {
 
         // Ensure default guide sections exist
         if (!config.guide) {
-            config.guide = [
-                { id: "zweck", menuTitle: "Wofür gedacht?", icon: "✦", title: "Wofür ist der Generator gedacht?", content: "Der Social Media Grafik Generator unterstützt Dich dabei, aus einem hochgeladenen Foto schnell konsistente Social-Media-Grafiken zu erstellen.<br>Dabei werden vordefinierte Vorlagen/Overlays (z.B. für Instagram und Facebook) automatisch über Dein Foto gelegt und in die passenden Formate gerendert." },
-                { id: "funktion", menuTitle: "Was macht er?", icon: "▦", title: "Was macht der Generator?", content: "Nach dem Upload erzeugt der Generator mehrere Ausgabeformate (je nach Motiv/Vorlage) und zeigt diese als Vorschau an.<br>Du kannst die generierten Grafiken anschließend einzeln oder gesammelt als ZIP herunterladen.\n<ul class=\"guide-list\">\n  <li>Automatisches Rendern in mehrere Formate</li>\n  <li>Vorschau der Ergebnisse direkt im Browser</li>\n  <li>Feinjustierung des Bildausschnitts über „Motiv ausrichten“</li>\n</ul>" },
-                { id: "bedienung", menuTitle: "Bedienung", icon: "✓", title: "So bedienst Du den Generator", content: "<ol class=\"guide-steps\">\n  <li><strong>Foto hochladen:</strong> Wähle eine PNG- oder JPG-Datei aus oder ziehe sie per Drag-and-Drop in das Upload-Feld.</li>\n  <li><strong>Datei prüfen:</strong> Nach dem Upload siehst Du den Dateinamen und kannst die Datei über das weiße „X“ wieder entfernen.</li>\n  <li><strong>Motiv auswählen:</strong> Wähle das gewünschte Motiv aus (falls verfügbar).</li>\n  <li><strong>Generieren:</strong> Klicke auf „Generieren“, um alle Formate zu erstellen.</li>\n  <li><strong>Feinausrichtung:</strong> Nutze bei Bedarf „Motiv ausrichten“, um den Bildausschnitt zu optimieren.</li>\n</ol>" },
-                { id: "anforderungen", menuTitle: "Datei & Mindesthöhe", icon: "⟡", title: "Wichtige Hinweise (Datei & Mindesthöhe)", content: "Es werden ausschließlich <strong>PNG</strong>- und <strong>JPG</strong>-Dateien akzeptiert. Zusätzlich muss Dein Bild eine Mindesthöhe erfüllen, damit die Vorlagen sauber angewendet werden können.\n<div class=\"guide-callout\">\n  <p class=\"muted\">\n    <strong>Mindesthöhe:</strong> mindestens <strong>75%</strong> der Höhe der größten verwendeten Vorlage (Overlay).\n    Beispiel: Wenn die größte Vorlage <strong>1920px</strong> hoch ist, muss Dein Bild mindestens <strong>1440px</strong> hoch sein.\n  </p>\n</div>\nWenn die Datei nicht geeignet ist (z.B. falsches Dateiformat oder zu geringe Höhe), erscheint eine Meldung als Popup mit der genauen Fehlerbeschreibung." },
-                { id: "downloads", menuTitle: "Downloads", icon: "⬇", title: "Downloads", content: "Du kannst die Grafiken entweder <strong>einzeln</strong> pro Ergebnis-Kachel herunterladen oder gesammelt als <strong>ZIP</strong>.<br>Der ZIP-Download bündelt alle generierten Formate in einer Datei." },
-                { id: "menue", menuTitle: "Menü", icon: "☰", title: "Menü (oben rechts)", content: "Über das Menü kannst Du jederzeit einen „Neuen Upload“ starten. Der Punkt „Alle herunterladen“ ist erst aktiv, sobald Ergebnisse generiert wurden.<br>Außerdem gelangst Du von dort direkt zur Anleitung." }
-            ];
+            // Clone defaults
+            config.guide = JSON.parse(JSON.stringify(DEFAULT_GUIDE));
             await saveConfig(true); // Save defaults back
         }
 
@@ -330,6 +333,15 @@ function setupEventListeners() {
         });
         saveConfig(true);
         renderGuide();
+    });
+
+    document.getElementById('resetGuideBtn').addEventListener('click', () => {
+        if (confirm('Achtung: Dadurch werden alle aktuellen Abschnitte der Anleitung gelöscht und durch den Standardtext ersetzt. Fortfahren?')) {
+            config.guide = JSON.parse(JSON.stringify(DEFAULT_GUIDE));
+            saveConfig(true);
+            renderGuide();
+            showToast('FAQ erfolgreich auf Standard zurückgesetzt!', 'success');
+        }
     });
 
     document.getElementById('logoUpload').addEventListener('change', async (e) => {
