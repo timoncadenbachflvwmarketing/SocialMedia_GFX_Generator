@@ -4,20 +4,39 @@ import json
 import os
 import shutil
 import cgi
+import base64
+from urllib.parse import urlparse, parse_qs
 
 PORT = 8000
 CONFIG_FILE = 'config.json'
 ASSETS_DIR = 'assets'
 OVERLAYS_DIR = 'overlays'
 
-from urllib.parse import urlparse, parse_qs
+# Format is 'username:password' -> Base64
+# admin:kumqab-noqguT-9qokga
+EXPECTED_AUTH = "Basic " + base64.b64encode(b"admin:kumqab-noqguT-9qokga").decode("utf-8")
 
 class RequestHandler(http.server.SimpleHTTPRequestHandler):
+    def check_auth(self):
+        auth_header = self.headers.get('Authorization')
+        if auth_header != EXPECTED_AUTH:
+            self.send_response(401)
+            self.send_header('WWW-Authenticate', 'Basic realm="Admin Access Required"')
+            self.end_headers()
+            self.wfile.write(b"Unauthorized")
+            return False
+        return True
+
     def do_GET(self):
         print(f"DEBUG: Original path request: {self.path}")
         parsed_path = urlparse(self.path)
         self.path = parsed_path.path
         print(f"DEBUG: Processed path: {self.path}")
+        
+        # Protect the admin frontend
+        if self.path.startswith('/admin.html') or self.path.startswith('/admin.js'):
+            if not self.check_auth():
+                return
         
         if self.path == '/api/config':
             self.send_response(200)
@@ -32,6 +51,10 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
+        # Protect all API write routes
+        if not self.check_auth():
+            return
+
         parsed_path = urlparse(self.path)
         path = parsed_path.path
 

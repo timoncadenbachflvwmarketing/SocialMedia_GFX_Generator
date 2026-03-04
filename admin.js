@@ -23,8 +23,44 @@ const DEFAULT_GUIDE = [
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
+    setupNavigation();
     await loadConfig();
     setupEventListeners();
+}
+
+function setupNavigation() {
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    const sections = document.querySelectorAll('.main-content > section.card');
+
+    navLinks.forEach(link => {
+        // Skip external links like the back button
+        if (!link.getAttribute('href').startsWith('#')) return;
+
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+
+            // Update active state in nav
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            link.classList.add('active');
+
+            // Hide all sections, show target
+            sections.forEach(sec => {
+                if (sec.id === targetId) {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    // Ensure initial state: hide all sections except the first one ("#texts")
+    sections.forEach(sec => {
+        if (sec.id !== 'texts') {
+            sec.classList.add('hidden');
+        }
+    });
 }
 
 async function loadConfig() {
