@@ -44,14 +44,26 @@ function renderTextConfig() {
 window.deleteOverlay = async function (themeIndex, key) {
     if (!confirm('Overlay wirklich löschen?')) return;
 
-    // Deleting the logical entry. 
-    // Ideally we also delete the physical file IF no other key uses it, but that's complex logic.
-    // For now, we just remove the config entry as requested "Motive verwalten".
-
     const theme = config.themes[themeIndex];
     const idx = theme.files.findIndex(f => f.key === key);
     if (idx >= 0) {
+        const fileToDelete = theme.files[idx].overlay;
         theme.files.splice(idx, 1);
+
+        // Physical file deletion if it's not used by any other remaining overlay in this theme
+        const isStillUsed = theme.files.some(f => f.overlay === fileToDelete);
+        if (!isStillUsed) {
+            try {
+                await fetch('/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: `overlays/${theme.path}${fileToDelete}` })
+                });
+            } catch (err) {
+                console.error("Failed to delete physical file:", err);
+            }
+        }
+
         await saveConfig(true);
         renderThemes();
     }
@@ -218,9 +230,17 @@ async function deleteTheme(index) {
     if (!confirm('Motiv wirklich löschen?')) return;
 
     const theme = config.themes[index];
-    // Optional: Delete folder on server? 
-    // Keeping it simple: remove from config.
-    // If user wants to delete folder, we can add that logic later.
+
+    // Delete folder on server
+    try {
+        await fetch('/api/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: `overlays/${theme.path}` })
+        });
+    } catch (err) {
+        console.error("Failed to delete physical directory:", err);
+    }
 
     config.themes.splice(index, 1);
     await saveConfig(true);
