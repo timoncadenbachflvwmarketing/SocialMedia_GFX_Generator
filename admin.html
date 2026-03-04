@@ -446,9 +446,11 @@
     <template id="themeTemplate">
         <div class="card theme-card">
             <div class="theme-header">
-                <div>
-                    <h3 class="theme-name" style="margin: 0; font-size: 1.1rem;">Theme Name</h3>
-                    <code class="theme-path" style="font-size: 0.8rem; color: var(--text-muted);"></code>
+                <div style="flex: 1; margin-right: 20px;">
+                    <input class="theme-name-input" type="text" title="Motiv-Name bearbeiten"
+                        style="width: 100%; font-size: 1.1rem; font-weight: bold; margin: 0; padding: 4px 8px; border: 1px solid transparent; background: transparent; border-radius: 4px; transition: all 0.2s; color: var(--text-main); font-family: inherit;" />
+                    <code class="theme-path"
+                        style="font-size: 0.8rem; color: var(--text-muted); display: block; padding-left: 8px; margin-top: 4px;"></code>
                 </div>
                 <button class="btn btn-danger btn-ghost delete-theme-btn"
                     style="padding: 6px 12px; font-size: 0.8rem;">Löschen</button>

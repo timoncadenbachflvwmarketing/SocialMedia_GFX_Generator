@@ -104,8 +104,9 @@ async function handleSmartUpload(event, themeIndex) {
                 // Find existing entry or create new
                 const existingIdx = theme.files.findIndex(f => f.key === match.key);
 
-                // Use dimensions as default label for new uploads
-                const defaultLabel = `${match.w} x ${match.h}`;
+                // Use filename without extension as default label for new uploads
+                const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                const defaultLabel = nameWithoutExt;
 
                 const entry = {
                     key: match.key,
@@ -154,7 +155,26 @@ function renderThemes() {
     (config.themes || []).forEach((theme, index) => {
         const clone = tmpl.content.cloneNode(true);
 
-        clone.querySelector('.theme-name').textContent = theme.name;
+        const nameInput = clone.querySelector('.theme-name-input');
+        nameInput.value = theme.name;
+        nameInput.addEventListener('change', async (e) => {
+            const newName = e.target.value.trim();
+            if (newName) {
+                config.themes[index].name = newName;
+                await saveConfig(true);
+            } else {
+                e.target.value = theme.name;
+            }
+        });
+        nameInput.addEventListener('focus', function () {
+            this.style.borderColor = 'var(--border)';
+            this.style.background = '#fff';
+        });
+        nameInput.addEventListener('blur', function () {
+            this.style.borderColor = 'transparent';
+            this.style.background = 'transparent';
+        });
+
         clone.querySelector('.theme-path').textContent = `/${theme.path}`;
         clone.querySelector('.delete-theme-btn').addEventListener('click', () => deleteTheme(index));
 
