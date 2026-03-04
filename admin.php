@@ -1,3 +1,16 @@
+<?php
+$expected_username = 'admin';
+$expected_password = 'kumqab-noqguT-9qokga';
+if (
+    !isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW']) ||
+    $_SERVER['PHP_AUTH_USER'] !== $expected_username || $_SERVER['PHP_AUTH_PW'] !== $expected_password
+) {
+    header('WWW-Authenticate: Basic realm="Admin Access Required"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo "Unauthorized";
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="de">
 

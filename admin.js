@@ -65,7 +65,7 @@ function setupNavigation() {
 
 async function loadConfig() {
     try {
-        const res = await fetch('/api/config?v=' + Date.now());
+        const res = await fetch('api.php?action=config&v=' + Date.now());
         config = await res.json();
 
         // Ensure default guide sections exist
@@ -144,7 +144,7 @@ window.deleteOverlay = async function (themeIndex, key) {
         const isStillUsed = theme.files.some(f => f.overlay === fileToDelete);
         if (!isStillUsed) {
             try {
-                await fetch('/api/delete', {
+                await fetch('api.php?action=delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ path: `overlays/${theme.path}${fileToDelete}` })
@@ -323,7 +323,7 @@ async function deleteTheme(index) {
 
     // Delete folder on server
     try {
-        await fetch('/api/delete', {
+        await fetch('api.php?action=delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: `overlays/${theme.path}` })
@@ -523,7 +523,7 @@ async function uploadFile(file, path) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('path', path);
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const res = await fetch('api.php?action=upload', { method: 'POST', body: formData });
     if (!res.ok) {
         const text = await res.text();
         console.error(`Upload failed: ${res.status} ${res.statusText}`, text);
@@ -532,7 +532,7 @@ async function uploadFile(file, path) {
 }
 
 async function saveConfig(silent = false) {
-    const res = await fetch('/api/config', {
+    const res = await fetch('api.php?action=config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)

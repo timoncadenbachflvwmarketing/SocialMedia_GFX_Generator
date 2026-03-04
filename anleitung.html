@@ -88,7 +88,7 @@
     // Dynamic Content Loading
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        const res = await fetch('/api/config?v=' + Date.now());
+        const res = await fetch('api.php?action=config&v=' + Date.now());
         const config = await res.json();
 
         // Populate Footer

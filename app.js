@@ -215,7 +215,7 @@ async function initThemesAndFormats() {
     toggleThemeLoading(true);
 
     // Fetch config from server
-    const res = await fetch(`/api/config?v=${Date.now()}`);
+    const res = await fetch(`api.php?action=config&v=${Date.now()}`);
     if (!res.ok) throw new Error("Config not loaded");
     const config = await res.json();
 
