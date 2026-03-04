@@ -465,7 +465,7 @@
                 <div
                     style="flex: 1; display: grid; grid-template-columns: 80px 1fr 1fr; gap: 12px; align-items: center;">
                     <div>
-                        <label style="font-size: 0.75rem;">Icon (Text/Emoji)</label>
+                        <label style="font-size: 0.75rem;">Icon</label>
                         <input type="text" class="guide-icon" placeholder="z.B. ✦"
                             style="padding: 6px; text-align: center;">
                     </div>
@@ -481,11 +481,15 @@
                 <button class="btn btn-danger btn-ghost delete-guide-btn"
                     style="padding: 6px 10px; font-size: 0.8rem; margin-left: 16px;">Löschen</button>
             </div>
-            <div>
-                <label style="font-size: 0.75rem;">Inhalt (HTML erlaubt)</label>
-                <textarea class="guide-content-html" rows="4"
-                    style="font-family: monospace; font-size: 0.85rem; line-height: 1.4;"></textarea>
-            </div>
+            <details class="guide-content-details" style="margin-top: 10px; cursor: pointer;">
+                <summary style="font-size: 0.85rem; font-weight: 600; color: var(--primary); outline: none;">Inhalt
+                    aufklappen / bearbeiten</summary>
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 0.75rem;">Inhalt (HTML erlaubt)</label>
+                    <textarea class="guide-content-html" rows="4"
+                        style="font-family: monospace; font-size: 0.85rem; line-height: 1.4; resize: vertical; min-height: 120px;"></textarea>
+                </div>
+            </details>
         </div>
     </template>
 

@@ -284,10 +284,6 @@ function renderGuide() {
         inputTitle.value = section.title || '';
         inputContent.value = section.content || '';
 
-        // Auto resize textarea (rudimentary)
-        inputContent.style.height = 'auto';
-        inputContent.style.height = (inputContent.scrollHeight + 5) + 'px';
-
         clone.querySelector('.delete-guide-btn').addEventListener('click', () => {
             if (confirm('Abschnitt wirklich löschen?')) {
                 config.guide.splice(index, 1);
