@@ -464,7 +464,10 @@ function setupEventListeners() {
         if (file) {
             try {
                 await uploadFile(file, 'assets/logo.png');
-                document.getElementById('currentLogo').src = 'assets/logo.png?v=' + Date.now();
+                const v = Date.now();
+                document.getElementById('currentLogo').src = 'assets/logo.png?v=' + v;
+                const sidebarLogo = document.getElementById('sidebarLogo');
+                if (sidebarLogo) sidebarLogo.src = 'assets/logo.png?v=' + v;
                 showToast('Logo erfolgreich aktualisiert!');
             } catch (err) {
                 showToast('Logo Upload fehlgeschlagen', 'error');
@@ -490,8 +493,7 @@ function updateConfigFromUI() {
         accentDark: document.getElementById('theme_accentDark').value,
         gradientStart: document.getElementById('theme_gradientStart').value,
         gradientEnd: document.getElementById('theme_gradientEnd').value,
-        adminAccent: document.getElementById('theme_adminAccent').value,
-        glass: document.getElementById('theme_glass').value
+        adminAccent: document.getElementById('theme_adminAccent').value
     };
 
     applyAdminTheme(config.theme.adminAccent);

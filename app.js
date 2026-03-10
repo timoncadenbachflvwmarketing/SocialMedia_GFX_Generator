@@ -97,6 +97,15 @@ const modalOkBtn = document.getElementById("modalOkBtn");
 const bootOverlay = document.getElementById("bootOverlay");
 const bootLogo = document.getElementById("bootLogo");
 const loadingOverlay = document.getElementById("loadingOverlay");
+
+// Bust cache for freshly uploaded logos on the frontend
+const _v = Date.now();
+if (bootLogo) bootLogo.src = "assets/logo.png?v=" + _v;
+const _headerLogo = document.querySelector(".page-header .logo");
+if (_headerLogo) _headerLogo.src = "assets/logo.png?v=" + _v;
+const _warningLogo = document.querySelector(".warning-logo");
+if (_warningLogo) _warningLogo.src = "assets/logo.png?v=" + _v;
+
 const IS_FILE_PROTOCOL = window?.location?.protocol === "file:";
 const PREFERS_REDUCED_MOTION =
   typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

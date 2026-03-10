@@ -584,8 +584,8 @@ if (
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2 style="display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap;">
-                    <img src="assets/logo.png" id="sidebarLogo" style="height: 40px; display: block; flex-shrink: 0;"
-                        alt="SMG Admin">
+                    <img src="assets/logo.png?v=<?= file_exists('assets/logo.png') ? filemtime('assets/logo.png') : '1' ?>"
+                        id="sidebarLogo" style="height: 40px; display: block; flex-shrink: 0;" alt="SMG Admin">
                 </h2>
             </div>
             <nav>
@@ -658,7 +658,8 @@ if (
                 <h2>Logo</h2>
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <div style="padding: 10px; background: #eee; border-radius: 8px;">
-                        <img src="assets/logo.png" id="currentLogo" style="height: 40px; display: block;">
+                        <img src="assets/logo.png?v=<?= file_exists('assets/logo.png') ? filemtime('assets/logo.png') : '1' ?>"
+                            id="currentLogo" style="height: 40px; display: block;">
                     </div>
                     <div style="flex: 1;">
                         <label>Neues Logo hochladen</label>
