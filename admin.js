@@ -162,7 +162,6 @@ function renderThemeConfig() {
     document.getElementById('theme_gradientStart').value = config.theme.gradientStart || '#CC071E';
     document.getElementById('theme_gradientEnd').value = config.theme.gradientEnd || '#a60517';
     document.getElementById('theme_adminAccent').value = config.theme.adminAccent || '#009640';
-    document.getElementById('theme_glass').value = config.theme.glass || 'light';
 
     // Apply admin accent globally for the backend
     applyAdminTheme(config.theme.adminAccent);
@@ -170,8 +169,9 @@ function renderThemeConfig() {
 
 function applyAdminTheme(hexColor) {
     if (!hexColor) return;
-    document.documentElement.style.setProperty('--primary', hexColor);
-    document.documentElement.style.setProperty('--primary-dark', `color-mix(in srgb, ${hexColor} 80%, black)`);
+    document.documentElement.style.setProperty('--md-sys-color-primary', hexColor);
+    document.documentElement.style.setProperty('--md-sys-color-primary-container', `color-mix(in srgb, ${hexColor} 15%, transparent)`);
+    document.documentElement.style.setProperty('--md-sys-color-on-primary-container', `color-mix(in srgb, ${hexColor} 90%, black)`);
 }
 
 // Make globally available for inline onclick
@@ -321,7 +321,7 @@ function renderThemes() {
             this.style.background = 'transparent';
         });
 
-        clone.querySelector('.theme-path').textContent = `/${theme.path}`;
+        clone.querySelector('.theme-path').style.display = 'none';
         clone.querySelector('.delete-theme-btn').addEventListener('click', () => deleteTheme(index));
 
         // Smart Upload
@@ -339,7 +339,7 @@ function renderThemes() {
                 const card = document.createElement('div');
                 card.className = 'file-card';
                 card.innerHTML = `
-                    <div class="delete-overlay" onclick="window.deleteOverlay(${index}, '${file.key}')"><i class="fas fa-times"></i></div>
+                    <div class="delete-overlay" onclick="window.deleteOverlay(${index}, '${file.key}')"><span class="material-symbols-rounded">close</span></div>
                     <img src="overlays/${theme.path}${file.overlay}?v=${Date.now()}" class="file-preview">
                     <div class="file-info">
                         <input type="text" 
