@@ -42,11 +42,18 @@ function setupNavigation() {
         if (!link.getAttribute('href').startsWith('#')) return;
 
         link.addEventListener('click', (e) => {
+            const currentAnchor = e.currentTarget;
+            if (!currentAnchor) return;
+
+            const href = currentAnchor.getAttribute('href');
+            if (!href.startsWith('#')) return;
+
             e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
+
+            const targetId = href.substring(1);
 
             navLinks.forEach(nav => nav.classList.remove('active'));
-            link.classList.add('active');
+            currentAnchor.classList.add('active');
 
             Object.entries(tabPanes).forEach(([id, elementIds]) => {
                 elementIds.forEach(elId => {
@@ -60,6 +67,9 @@ function setupNavigation() {
                     }
                 });
             });
+
+            // Allow native jumping/scrolling if needed, or we just switch the tabs
+            window.location.hash = href;
         });
     });
 
@@ -71,6 +81,30 @@ function setupNavigation() {
             });
         }
     });
+
+    const toggleBtn = document.getElementById('toggleSidebarBtn');
+    if (toggleBtn) {
+        let sidebarState = parseInt(localStorage.getItem('smg_sidebar_state') || '1', 10);
+        // States: 0 = expanded, 1 = collapsed (icons), 2 = hidden
+
+        const applySidebarState = () => {
+            document.querySelector('.layout').classList.remove('sidebar-collapsed', 'sidebar-hidden');
+            if (sidebarState === 1) {
+                document.querySelector('.layout').classList.add('sidebar-collapsed');
+            } else if (sidebarState === 2) {
+                document.querySelector('.layout').classList.add('sidebar-hidden');
+            }
+        };
+
+        // Apply initial state
+        applySidebarState();
+
+        toggleBtn.addEventListener('click', () => {
+            sidebarState = (sidebarState + 1) % 3;
+            localStorage.setItem('smg_sidebar_state', sidebarState);
+            applySidebarState();
+        });
+    }
 }
 
 async function loadConfig() {

@@ -25,17 +25,19 @@ if (
     <style>
         :root {
             --primary: #009640;
-            /* FLVW Green */
-            --primary-dark: #007a33;
-            --bg: #f3f4f6;
+            --primary-dark: color-mix(in srgb, var(--primary) 80%, black);
+            --primary-light: color-mix(in srgb, var(--primary) 15%, transparent);
+            --bg: #f8fafc;
             --surface: #ffffff;
             --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
             --danger: #ef4444;
             --success: #10b981;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --focus-ring: 0 0 0 4px var(--primary-light);
         }
 
         * {
@@ -55,6 +57,15 @@ if (
             display: grid;
             grid-template-columns: 280px 1fr;
             min-height: 100vh;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .layout.sidebar-collapsed {
+            grid-template-columns: 80px 1fr;
+        }
+
+        .layout.sidebar-hidden {
+            grid-template-columns: 0 1fr;
         }
 
         /* Sidebar */
@@ -66,6 +77,19 @@ if (
             top: 0;
             height: 100vh;
             overflow-y: auto;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .layout.sidebar-collapsed .sidebar {
+            padding: 24px 12px;
+        }
+
+        .layout.sidebar-hidden .sidebar {
+            padding: 0;
+            border-right: none;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .brand {
@@ -79,20 +103,41 @@ if (
         }
 
         .nav-link {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 12px 16px;
             color: var(--text-muted);
             text-decoration: none;
             border-radius: var(--radius);
             margin-bottom: 8px;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .layout.sidebar-collapsed .nav-link {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .nav-text {
+            transition: opacity 0.2s;
+        }
+
+        .layout.sidebar-collapsed .nav-text {
+            display: none;
+        }
+
+        .nav-link i {
+            font-size: 1.1em;
+            width: 20px;
+            text-align: center;
         }
 
         .nav-link:hover,
         .nav-link.active {
-            background-color: #f0fdf4;
-            /* Light green tint */
+            background-color: var(--primary-light);
             color: var(--primary);
         }
 
@@ -107,6 +152,31 @@ if (
             justify-content: space-between;
             align-items: center;
             margin-bottom: 32px;
+        }
+
+        .header-actions-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sidebar-toggle-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: var(--bg);
+            color: var(--primary);
         }
 
         h1 {
@@ -124,14 +194,25 @@ if (
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: var(--radius);
             font-weight: 600;
             cursor: pointer;
             border: none;
-            transition: all 0.2s;
-            font-size: 0.875rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-primary {
@@ -147,20 +228,23 @@ if (
             background: transparent;
             color: var(--text-muted);
             border: 1px solid var(--border);
+            box-shadow: none;
         }
 
         .btn-ghost:hover {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--text-main);
+            border-color: #cbd5e1;
         }
 
         .btn-danger {
-            background: #fee2e2;
+            background: #fef2f2;
             color: var(--danger);
+            box-shadow: none;
         }
 
         .btn-danger:hover {
-            background: #fecaca;
+            background: #fee2e2;
         }
 
         /* Cards */
@@ -168,9 +252,9 @@ if (
             background: var(--surface);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 24px;
+            padding: 32px;
             margin-bottom: 24px;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .form-grid {
@@ -190,27 +274,34 @@ if (
         label {
             display: block;
             font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
         }
 
         input[type="text"],
+        input[type="password"],
+        select,
         textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 0.95rem;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
             font-family: inherit;
+            background-color: #f8fafc;
+            color: var(--text-main);
         }
 
         input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus,
         textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 150, 64, 0.1);
+            background-color: #ffffff;
+            box-shadow: var(--focus-ring);
         }
 
         /* Themes */
@@ -234,17 +325,17 @@ if (
         .smart-upload-area {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
-            padding: 30px;
+            padding: 40px 20px;
             text-align: center;
-            background: white;
-            transition: all 0.2s;
+            background: var(--bg);
+            transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
         }
 
         .smart-upload-area:hover {
             border-color: var(--primary);
-            background: #f0fdf4;
+            background: var(--primary-light);
         }
 
         .smart-upload-area input {
@@ -267,10 +358,16 @@ if (
         .file-card {
             background: white;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .file-preview {
@@ -413,24 +510,36 @@ if (
     <div class="layout">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2 style="display: flex; align-items: center; gap: 8px;">
-                    <img src="assets/logo.png" id="sidebarLogo" style="height: 40px; display: block;" alt="SMG Admin">
+                <h2 style="display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap;">
+                    <img src="assets/logo.png" id="sidebarLogo" style="height: 40px; display: block; flex-shrink: 0;"
+                        alt="SMG Admin">
                 </h2>
             </div>
             <nav>
-                <a href="#texts" class="nav-link active">Texte & Inhalte</a>
-                <a href="#thema" class="nav-link">Design & Farben</a>
-                <a href="#themes" class="nav-link">Motive & Design</a>
-                <a href="#anleitung" class="nav-link">Anleitung</a>
-                <a href="#about" class="nav-link">Über SMG Admin</a>
-                <a href="index.html" class="nav-link" style="margin-top: 40px; color: var(--primary);">Zum Generator
-                    &rarr;</a>
+                <a href="#texts" class="nav-link active"><i class="fas fa-font"></i> <span class="nav-text">Texte &
+                        Inhalte</span></a>
+                <a href="#thema" class="nav-link"><i class="fas fa-palette"></i> <span class="nav-text">Design &
+                        Farben</span></a>
+                <a href="#themes" class="nav-link"><i class="fas fa-images"></i> <span class="nav-text">Motive &
+                        Design</span></a>
+                <a href="#anleitung" class="nav-link"><i class="fas fa-book"></i> <span
+                        class="nav-text">Anleitung</span></a>
+                <a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> <span class="nav-text">Über SMG
+                        Admin</span></a>
+                <a href="index.html" class="nav-link" target="_blank"
+                    style="margin-top: 40px; color: var(--primary);"><i class="fas fa-external-link-alt"></i> <span
+                        class="nav-text">Zum Generator</span></a>
             </nav>
         </aside>
 
         <main class="main-content">
             <div class="header-actions">
-                <h1>Einstellungen</h1>
+                <div class="header-actions-left">
+                    <button id="toggleSidebarBtn" class="sidebar-toggle-btn" title="Menü umschalten">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Einstellungen</h1>
+                </div>
                 <button id="saveConfigBtn" class="btn btn-primary">
                     <i class="fas fa-save"></i> Änderungen speichern
                 </button>
@@ -568,7 +677,7 @@ if (
                 <div
                     style="background: var(--surface); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); line-height: 1.6;">
                     <h3 style="margin-top: 0; color: var(--primary);">Social Media Grafik (SMG) Generator</h3>
-                    <p><strong>Version:</strong> 1.2.0</p>
+                    <p><strong>Version:</strong> 1.3.0</p>
                     <p><strong>Agentur/Entwickler:</strong> FLVW Marketing GmbH</p>
                     <p><strong>Technologien:</strong> HTML5, CSS3, Vanilla JavaScript, Python 3 (Backend)</p>
                     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
