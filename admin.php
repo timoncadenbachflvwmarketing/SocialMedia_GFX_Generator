@@ -21,6 +21,7 @@ if (
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #009640;
@@ -362,6 +363,47 @@ if (
         .toast.error {
             background: var(--danger);
         }
+
+        /* Responsive Layout */
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 24px 16px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: span 1;
+            }
+
+            .theme-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
     </style>
     <script src="admin.js?v=8" defer></script>
 </head>
@@ -372,7 +414,7 @@ if (
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2 style="display: flex; align-items: center; gap: 8px;">
-                    SMG Admin
+                    <img src="assets/logo.png" id="sidebarLogo" style="height: 40px; display: block;" alt="SMG Admin">
                 </h2>
             </div>
             <nav>
@@ -381,7 +423,8 @@ if (
                 <a href="#themes" class="nav-link">Motive & Design</a>
                 <a href="#anleitung" class="nav-link">Anleitung</a>
                 <a href="#about" class="nav-link">Über SMG Admin</a>
-                <a href="/" class="nav-link" style="margin-top: 40px; color: var(--primary);">Zum Generator &rarr;</a>
+                <a href="index.html" class="nav-link" style="margin-top: 40px; color: var(--primary);">Zum Generator
+                    &rarr;</a>
             </nav>
         </aside>
 
@@ -389,7 +432,7 @@ if (
             <div class="header-actions">
                 <h1>Einstellungen</h1>
                 <button id="saveConfigBtn" class="btn btn-primary">
-                    💾 Änderungen speichern
+                    <i class="fas fa-save"></i> Änderungen speichern
                 </button>
             </div>
 
@@ -428,7 +471,7 @@ if (
                 </div>
             </section>
 
-            <section class="card">
+            <section id="logo-section" class="card">
                 <h2>Logo</h2>
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <div style="padding: 10px; background: #eee; border-radius: 8px;">
@@ -525,7 +568,7 @@ if (
                 <div
                     style="background: var(--surface); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); line-height: 1.6;">
                     <h3 style="margin-top: 0; color: var(--primary);">Social Media Grafik (SMG) Generator</h3>
-                    <p><strong>Version:</strong> 1.1.0</p>
+                    <p><strong>Version:</strong> 1.2.0</p>
                     <p><strong>Agentur/Entwickler:</strong> FLVW Marketing GmbH</p>
                     <p><strong>Technologien:</strong> HTML5, CSS3, Vanilla JavaScript, Python 3 (Backend)</p>
                     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
@@ -554,7 +597,7 @@ if (
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div class="drag-handle"
                     style="padding-right: 12px; color: var(--text-muted); font-size: 1.2rem; cursor: grab; align-self: center;"
-                    title="Ziehen zum Sortieren">⋮⋮</div>
+                    title="Ziehen zum Sortieren"><i class="fas fa-grip-vertical"></i></div>
                 <div
                     style="flex: 1; display: grid; grid-template-columns: 80px 1fr 1fr; gap: 12px; align-items: center;">
                     <div>
@@ -603,7 +646,8 @@ if (
             <!-- Smart Header Upload -->
             <div class="smart-upload-area">
                 <input type="file" class="smart-upload-input" accept="image/png,image/jpeg" multiple>
-                <div style="font-size: 1.5rem; margin-bottom: 10px;">📂</div>
+                <div style="font-size: 2rem; margin-bottom: 10px; color: var(--text-muted);"><i
+                        class="fas fa-folder-open"></i></div>
                 <strong>Bilder hier ablegen oder klicken</strong>
                 <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
                     Lade mehrere PNGs hoch. Das System erkennt automatisch das Format anhand der Größe (z.B. 1080x1350).

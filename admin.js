@@ -30,35 +30,45 @@ async function init() {
 
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    const sections = document.querySelectorAll('.main-content > section.card');
+    const tabPanes = {
+        'texts': ['texts', 'logo-section'],
+        'thema': ['thema'],
+        'themes': ['themes'],
+        'anleitung': ['anleitung'],
+        'about': ['about']
+    };
 
     navLinks.forEach(link => {
-        // Skip external links like the back button
         if (!link.getAttribute('href').startsWith('#')) return;
 
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
 
-            // Update active state in nav
             navLinks.forEach(nav => nav.classList.remove('active'));
             link.classList.add('active');
 
-            // Hide all sections, show target
-            sections.forEach(sec => {
-                if (sec.id === targetId) {
-                    sec.classList.remove('hidden');
-                } else {
-                    sec.classList.add('hidden');
-                }
+            Object.entries(tabPanes).forEach(([id, elementIds]) => {
+                elementIds.forEach(elId => {
+                    const el = document.getElementById(elId);
+                    if (el) {
+                        if (id === targetId) {
+                            el.classList.remove('hidden');
+                        } else {
+                            el.classList.add('hidden');
+                        }
+                    }
+                });
             });
         });
     });
 
-    // Ensure initial state: hide all sections except the first one ("#texts")
-    sections.forEach(sec => {
-        if (sec.id !== 'texts') {
-            sec.classList.add('hidden');
+    Object.entries(tabPanes).forEach(([id, elementIds]) => {
+        if (id !== 'texts') {
+            elementIds.forEach(elId => {
+                const el = document.getElementById(elId);
+                if (el) el.classList.add('hidden');
+            });
         }
     });
 }
@@ -295,7 +305,7 @@ function renderThemes() {
                 const card = document.createElement('div');
                 card.className = 'file-card';
                 card.innerHTML = `
-                    <div class="delete-overlay" onclick="window.deleteOverlay(${index}, '${file.key}')">&times;</div>
+                    <div class="delete-overlay" onclick="window.deleteOverlay(${index}, '${file.key}')"><i class="fas fa-times"></i></div>
                     <img src="overlays/${theme.path}${file.overlay}?v=${Date.now()}" class="file-preview">
                     <div class="file-info">
                         <input type="text" 
